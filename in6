@@ -1,0 +1,10 @@
+S=ABC
+A=aX
+X=A|$
+B=bY
+Y=W|$
+W=bZ
+Z=W|$
+C=cC|$;
+
+fonte: http://www.ybadoo.com.br/tutoriais/cmp/03/11/
