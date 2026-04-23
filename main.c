@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define ITER 25
 
@@ -13,10 +14,59 @@ typedef struct block{
 	char antecedente[MAX_ANT], consequente[MAX_CONSEQ];
 } block;
 
-int stringComp(char *a, char *b) {
-	for(int i = 0; i<100; i++)	{
-		if((a[i] == '\0' || a[i] == '\n') && (b[i] == '\0' || b[i] == '\n')) return 1;
-		else if(a[i] != b[i]) return 0;
+int isTerminal(char x) {
+	if('a' <= x && x <= 'z') return 1;
+	return 0;
+}
+
+int isVoid(char x) {
+	if(x == '$') return 1;
+	return 0;
+}
+
+int isNotTerminal(int x) { 
+	if('A' <= x && x <= 'Z') return 1;
+	return 0;
+}
+
+int getIndice(block first[MAX_Y][MAX_X], char simboloNaoTerminal) {
+	int indice = -1;
+	for(int i = 0; i < MAX_Y; i++) {
+		if(first[i][0].antecedente[0] == simboloNaoTerminal) indice = i;
+	}
+	return indice;
+}
+
+int HaTransicaoVazia(char simbolo, block table[MAX_Y][MAX_X]) {
+	int indice = getIndice(table, simbolo);
+	if(indice == -1) return 0;
+	for(int k = 0; k < MAX_X; k++) if(table[indice][k].consequente[0] == '$') return 1;
+	return 0;
+}
+
+void adicionaTerminalAoFirst(block first[MAX_Y][MAX_X], char simboloTerminal, char simboloNaoTerminal) {
+	int indice = getIndice(first, simboloNaoTerminal);
+	if(indice == -1 || !isTerminal(simboloTerminal) || !isNotTerminal(simboloNaoTerminal)) {
+		printf("ERRO!\n"); return;	
+	}
+	for(int i = 0; i < MAX_X; i++) {
+		if(first[indice][i].consequente[0] == simboloTerminal) return;
+		if(first[indice][i].consequente[0] == '*') { 
+			first[indice][i].consequente[0] = simboloTerminal;
+			return;
+		}
+	}
+}
+
+void adicionaVazio(block first[MAX_Y][MAX_X], char naoTerminal) {
+	int indice = getIndice(first, naoTerminal);
+	if(indice == -1) return;
+	for(int i = 0; i < MAX_X; i++) {
+		if(first[indice][i].consequente[0] == '$') return;
+		if(first[indice][i].consequente[0] == '*') {
+			first[indice][i].consequente[0] = '$';
+			break;
+		}
 	}
 }
 
@@ -94,19 +144,14 @@ void printFirst(block first[MAX_Y][MAX_X]) {
 	}
 }
 
-int isTerminal(char x) {
-	if('a' <= x && x <= 'z') return 1;
-	return 0;
-}
-
-int isVoid(char x) {
-	if(x == '$') return 1;
-	return 0;
-}
-
-int isNotTerminal(int x) { 
-	if('A' <= x && x <= 'Z') return 1;
-	return 0;
+int TemVazioNoFirst(char simbolo, block first[MAX_Y][MAX_X]) {
+    int indice = getIndice(first, simbolo);
+    if(indice == -1) return 0;
+    for(int i = 0; i < MAX_X; i++) {
+        if(first[indice][i].consequente[0] == '$') return 1;
+        if(first[indice][i].consequente[0] == '*') break;
+    }
+    return 0;
 }
 
 void inicioTerminais(block table[MAX_Y][MAX_X], block first[MAX_Y][MAX_X]) {
@@ -161,59 +206,7 @@ void addFirstWithNoVoid(char antecedente, char consequente, block first[MAX_Y][M
                 	first[ant_indice][position].consequente[1] = '\0';
 		}
 	}
-}
-
-int HaTransicaoVazia(char simbolo, block table[MAX_Y][MAX_X]) {
-	int indice = -1;
-	for(int k = 0; k < MAX_Y; k++) if(table[k][0].antecedente[0] == simbolo) indice = k;
-	if(indice == -1) return 0;
-	for(int k = 0; k < MAX_X; k++) if(table[indice][k].consequente[0] == '$') return 1;
-	return 0;
-}
-
-int getIndice(block first[MAX_Y][MAX_X], char simboloNaoTerminal) {
-	int indice = -1;
-	for(int i = 0; i < MAX_Y; i++) {
-		if(first[i][0].antecedente[0] == simboloNaoTerminal) indice = i;
-	}
-	return indice;
 }	
-
-void adicionaTerminalAoFirst(block first[MAX_Y][MAX_X], char simboloTerminal, char simboloNaoTerminal) {
-	int indice = getIndice(first, simboloNaoTerminal);
-	if(indice == -1 || !isTerminal(simboloTerminal) || !isNotTerminal(simboloNaoTerminal)) {
-		printf("ERRO!\n"); return;	
-	}
-	for(int i = 0; i < MAX_X; i++) {
-		if(first[indice][i].consequente[0] == simboloTerminal) return;
-		if(first[indice][i].consequente[0] == '*') { 
-			first[indice][i].consequente[0] = simboloTerminal;
-			return;
-		}
-	}
-}
-
-void adicionaVazio(block first[MAX_Y][MAX_X], char naoTerminal) {
-	int indice = getIndice(first, naoTerminal);
-	if(indice == -1) return;
-	for(int i = 0; i < MAX_X; i++) {
-		if(first[indice][i].consequente[0] == '$') return;
-		if(first[indice][i].consequente[0] == '*') {
-			first[indice][i].consequente[0] = '$';
-			break;
-		}
-	}
-}
-
-int TemVazioNoFirst(char simbolo, block first[MAX_Y][MAX_X]) {
-    int indice = getIndice(first, simbolo);
-    if(indice == -1) return 0;
-    for(int i = 0; i < MAX_X; i++) {
-        if(first[indice][i].consequente[0] == '$') return 1;
-        if(first[indice][i].consequente[0] == '*') break;
-    }
-    return 0;
-}
 
 void inicioNaoTerminais(block table[MAX_Y][MAX_X], block first[MAX_Y][MAX_X]) {
    int podeSerVazio = 1; char ant, atual; 
