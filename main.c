@@ -55,21 +55,24 @@ int main() {
 		consequente[i].prox = NULL;
 	}
 
-	for (int i = 0; i < qtde_nao_terminais; i++) {
-    	scanf("%s", antecedente[i]); 
-    	scanf("%s", buffer);
-
+	for(int i = 0; i < qtde_nao_terminais; i++) {
+    	scanf(" %s %c ", antecedente[i], buffer); 
+		buffer[0] = '\0';
 		for(int j = 0; j < 50 && buffer[j] != ' '; j++) {
 			scanf("%c", &buffer[j]);
-			if(buffer[i] == ' ') { 
-				buffer[i] = '\0';
+			if(buffer[j] == ' ') { 
+				buffer[j] = '\0';
+				push(&consequente[i], buffer);
+				j = -1;
 			}
-			push(&consequente[i], buffer);
+			if(buffer[j] == '\n') {
+				buffer[j] = '\0';
+				if(j != 0) push(&consequente[i], buffer);
+				break;
+			}
+			
 		}
-	    /*do {
-        	if (scanf("%50s%c", buffer, &espaco) != 2) break;
-        	push(&consequente[i], buffer);
-    	} while (espaco != '\n');*/
+	    
 	}
 
 	for (int i = 0; i < qtde_nao_terminais; i++) {
